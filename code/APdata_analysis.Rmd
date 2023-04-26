@@ -1,0 +1,270 @@
+---
+title: "APdata_analysisMW"
+author: "Maggie Westerland"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(knitr)
+library(gtsummary)
+library(skimr)
+library(DBI)
+library(RSQLite)
+library(lubridate)
+library(glmnet)
+setwd('~/Desktop/grad/capstone/code')
+```
+
+
+```{r}
+load('final_df.Rdata')
+```
+
+```{r}
+final_df <- final_df %>% 
+  mutate(pre_htn = as.factor(pre_htn)) %>% 
+  mutate(post_htn = as.factor(post_htn)) %>% 
+  mutate(bmi_return = as.factor(bmi_return)) %>% 
+  mutate(gest_age_wks = as.numeric(gest_age_wks)) %>% 
+  mutate(ob_gravidity = as.character(ob_gravidity)) %>% 
+  mutate(ob_gravidity = as.factor(ob_gravidity)) %>% 
+  mutate(ob_parity = as.character(ob_parity)) %>% 
+  mutate(ob_parity = as.factor(ob_parity)) %>% 
+  mutate(ob_multiple_births = as.character(ob_multiple_births)) %>% 
+  mutate(ob_multiple_births = as.factor(ob_multiple_births)) %>% 
+  filter(delivery_method != 'Other') %>% 
+  mutate(delivery_method = as.character(delivery_method)) %>% 
+  mutate(delivery_method = as.factor(delivery_method)) %>% 
+  mutate(ob_gravidity = factor(ob_gravidity, levels = c(1,
+                                                        2,
+                                                        3,
+                                                        4,
+                                                        5,
+                                                        6,
+                                                        7,
+                                                        8,
+                                                        9,
+                                                        10,
+                                                        11,
+                                                        12,
+                                                        13,
+                                                        14,
+                                                        15,
+                                                        16,
+                                                        17,
+                                                        18))) %>% 
+  mutate(ob_parity = factor(ob_parity, levels = c(1,
+                                                  2,
+                                                  3,
+                                                  4,
+                                                  5,
+                                                  6,
+                                                  7,
+                                                  8,
+                                                  9,
+                                                  10,
+                                                  11,
+                                                  12)))
+```
+
+```{r}
+final_df %>% 
+  select(mom_age_at_del,
+         mom_race,
+         mom_ethnicity,
+         mom_marital_status,
+         employment_status,
+         preeclampsia,
+         pregest_dm,
+         gestational_dm,
+         placental_abruption,
+         maternal_dvt,
+         gest_age_wks,
+         delivery_method,
+         ob_gravidity,
+         ob_parity,
+         ob_multiple_births,
+         baby_count,
+         mean_pre_bmi,
+         mean_post_bmi,
+         bmi_return
+  ) %>% 
+  tbl_summary(
+    by = bmi_return,
+    missing_text = 'Missing'
+  ) %>%
+  add_p() %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels() 
+```
+
+```{r}
+unweighted_mod <- glm(
+   post_htn ~ 
+    bmi_return +
+    mom_age_at_del +
+    mom_race +
+    mom_ethnicity +
+    mom_marital_status +
+    employment_status +
+    preeclampsia +
+    pregest_dm +
+    gestational_dm +
+    placental_abruption +
+    #maternal_dvt #+ # not enough obs
+    gest_age_wks +
+    delivery_method +
+    ob_gravidity +
+    ob_parity +
+    ob_multiple_births +
+    baby_count +
+    mean_pre_bmi
+    #mean_post_bmi not converging
+  ,
+  data = final_df,
+  family = binomial(link = "logit")) 
+
+summary(unweighted_mod)
+
+unweighted_mod2 <- glm(
+  post_htn ~ 
+    bmi_return +
+    mom_age_at_del +
+    mom_race +
+    mom_ethnicity +
+    mom_marital_status +
+    employment_status +
+    preeclampsia +
+    pregest_dm +
+    gestational_dm +
+    placental_abruption +
+    #maternal_dvt #+ # not enough obs
+    gest_age_wks +
+    delivery_method +
+    ob_gravidity +
+    ob_parity +
+    ob_multiple_births +
+    baby_count +
+    mean_pre_bmi
+    #mean_post_bmi not converging
+  ,
+  data = unweighted_mod$model,
+  family = binomial(link = "logit")) 
+
+step_unweight2 <- step(unweighted_mod2)
+summary(step_unweight2)
+tbl_regression(step_unweight2, exponentiate = T)
+```
+
+data dictionary:
+
+**patient_num**: *integer* unique to each patient
+
+**dx_code**: *character* ICD-10 code for the diagnosis of hypertension if applicable, I10
+
+**htn_dx_date**: *date* shifted date of patient diagnosis of hypertension if applicable, shifted by $\pm$ 10 days
+
+**pre_htn**: *factor* yes if patient was diagnosed w/ hypertension before 12 months post-delivery, no if not
+
+**post_htn**: *factor* yes if patient was diagnosed w/ hypertension between 13-72 months post-delivery, no if not
+
+**mom_admit_dttm_shifted**: *date* date of the mother's delivery admission
+
+**mom_disch_dttm_shifted**: *date* date of the mother's delivery discharge
+
+**mom_los**: *integer* mom's length of stay in days for the delivery encounter
+
+**mom_age_at_del**: *date* mom's age at delivery in years
+
+**mom_marital_status**: *factor* mom's current marital status: Divorced, Married, Other, Single
+
+**mom_race**: *factor* mom's current race: Black or African American, Other, White or Caucasian
+
+**mom_ethnicity**: *factor* mom's current ethnicity: Hispanic, NH (non-hispanic), Other
+
+**mom_wt_oz**: *numeric* most recent mother weight up to delivery
+
+**mom_bmi**: *numeric* most recent mother BMI up to delivery
+
+**preeclampsia**: *factor* indicates presence of a preeclampsia diagnosis on the
+delivery encounter
+
+**pregest_dm**: *factor* indicates presence of a pregestational diabetes diagnosis
+on the delivery encounter
+
+**gestational_dm**: *factor* indicates presence of a gestational diabetes diagnosis on
+the delivery encounter
+
+**placental_abruption**: *factor* indicates presence of a placental abruption diagnosis on
+the delivery encounter
+
+**maternal_dvt**: *factor* indicates presence of a maternal deep vein thrombosis
+diagnosis on the delivery encounter
+
+**baby_patient_num**: *integer* Masked MRN, the i2b2 patient number
+
+**baby_yob_shifted**: *date* Baby's year of birth 
+
+**baby_dob_shifted**: *date* Baby's date of birth
+
+**baby_dod_shifted**: *date* Baby's date of death
+
+**baby_admit_dttm_shifted**: *date* Date of the baby's birth admission
+
+**baby_disch_dttm_shifted**: *date* Date of the baby's birth discharge
+
+**baby_birth_ht_in**: *numeric* Baby's birth height in inches
+
+**baby_birth_wt_oz**: *numeric* Baby's birth weight in ounces
+
+**baby_birth_wt_gms**: *numeric* Baby's birth weight in grams
+
+**gest_age_wks**: *numeric* Baby's gestational age in weeks and days divided 7
+
+**delivery_method**: *factor* Name of the delivery method used for the birth: C-Section, Operative Vaginal, Vaginal, Other (not included in analyses)
+
+**baby_sex**: *factor* baby's current sex, male or female
+
+**baby_race**: *factor* baby's current race: Black or African American, Other, White or Caucasian
+
+**baby_ethnicity**: *factor* baby's current ethnicity: Hispanic, NH (non-hispanic), Other
+
+**ob_gravidity**: *factor* Number of pregnancies documented on the first OB visit
+up to 90 days after the delivery
+
+**ob_parity**: *factor* Number of viable offspring documented on the first OB
+visit up to 90 days after the delivery
+
+**ob_multiple_births**: *factor* Number of multiple births documented on the first OB
+visit up to 90 days after the delivery
+
+**mom_ht_cm**: *numeric* mom's height in centimeters
+
+**baby_count**: *integer* number of babies birthed in most recent birth
+
+**diff_htn**: *numeric* number of days between diagnosis of hypertension and baby DOB
+
+**measure_date_shifted**: *date* date of mom's BMI measurement
+
+**highest_diastolic**: *numeric* mom's diastolic component of highest blood pressure up to delivery
+
+**highest_systolic**: *date* mom's systolic component of highest blood pressure up to delivery
+
+**post_bmi_date**: *date* date of post-delivery BMI measurement
+
+**pre_bmi_date**: *date* date of pre-delivery BMI measurement
+
+**mean_pre_bmi**: *numeric* averaged BMI measured pre-delivery
+
+**mean_post_bmi**: *numeric* averaged BMI measured post-delivery
+
+**birth_date_shifted**: *date* mom's birth date
+
+**employment_status**: *factor* mom's current employment status: Full Time, Part Time, Not Employed, Other
+
+**bmi_return**: *factor* yes if mom returned to pre-delivery BMI, no if post-delivery BMI was at least 1 point higher than pre-delivery BMI
