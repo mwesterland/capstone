@@ -1,7 +1,7 @@
 #############################################
 ####Subject: Data Manipulation
 ####Author: Maggie Westerland, MCW Biostatistics
-####Date: Mar 13th, 2023
+####Date: May 2nd, 2023
 ####Notes: R code for data manipulation for A. Palatnik
 #############################################
 
@@ -19,21 +19,21 @@ setwd('/Volumes/stor/capstone')
 
 #### notes ####
 #ICD-10 hypertension == I10
-# wouldn't we want pre_pregnancy bmi to be 9 months before delivery? return to pre
-# pregnancy weight wouldn't make sense if we include bmi @ delivery.
 ####
-
-#### data read in ####
 
 #### use these for easier access after cleaning ####
 load('dx_final.Rdata')
 load('ob_final.Rdata')
 load('dx_ob_merge_pipe.Rdata')
 load('vitals_final.Rdata')
+load('pt_demo_final.Rdata')
 load('final_df.Rdata')
-####
 
 global_pt_num <- ob_final$patient_num
+####
+
+
+#### database connect ####
 
 filename <- "/Volumes/stor/deid-3516-sa12575/sqlite-deid-3516-sa12575.db"
 sqlite.driver <- dbDriver("SQLite")
@@ -203,13 +203,6 @@ ob_pipe <- ob %>%
         na.rm = TRUE,
         remove = FALSE) %>% 
   mutate(gest_age_wks = na_if(gest_age_wks, "")) %>% 
-  slice(-c(2009, # weird values
-           17777,
-           17271,
-           10985,
-           27298,
-           23438,
-           5709)) %>%
   mutate(gest_age_wks = gsub('_0', '', gest_age_wks)) %>% 
   select(-gest_age_days,
          -gest_age_weeks) %>% 
@@ -397,22 +390,15 @@ dx_ob_merge$diff_htn <- as.numeric(difftime(dx_ob_merge$dx_date_shifted, dx_ob_m
 dx_ob_merge_pipe <- dx_ob_merge %>% 
   group_by(patient_num) %>% 
   mutate(
-    htn_dx_date = if_else(
-      condition = any(str_detect(dx_code, "I10")),
-      true = min(dx_date_shifted),
-      false = as.Date(NA)
-    )
-  ) %>% 
-  mutate(
-    pre_htn = if_else(
-      condition = ((diff_htn >= 0 & diff_htn <= 365) & is.na(htn_dx_date)), # @ delivery or up to 1 yr after
+    pre_htn = if_else( #exclusion crit
+      condition = ((diff_htn <= 365) & !is.na(diff_htn)), 
       true = "yes",
       false = "no"
     )
   ) %>% 
   mutate(
     post_htn = if_else(
-      condition = ((diff_htn >= 366 & diff_htn <= 2160) & is.na(htn_dx_date)) , #1 yr +/- 2 months after delivery
+      condition = ((diff_htn >= 366 & diff_htn <= 2160) & !is.na(diff_htn)) , #1 yr +/- 2 months after delivery
       true = "yes",
       false = "no"
     )
@@ -445,6 +431,8 @@ dx_ob_merge_pipe <- dx_ob_merge %>%
 rm(dx_ob_merge)
 gc()
 
+
+
 save(dx_ob_merge_pipe, file = 'dx_ob_merge_pipe.Rdata')
 
 ####
@@ -458,8 +446,8 @@ vit_dx_ob_merge$diff_date <- as.numeric(difftime(vit_dx_ob_merge$measure_date_sh
 vit_dx_ob_merge_pipe <- vit_dx_ob_merge %>% 
   mutate(
     pre_bmi_date = if_else(
-      condition = (diff_date >= -730 & diff_date <= 0), #2 yrs before + up to delivery
-      true = measure_date_shifted,
+      condition = (diff_date >= -730 & diff_date <= 0), #2 yrs before + up to pregnancy
+      true = measure_date_shifted, 
       false = as.Date(NA)
     )
   ) %>% 
@@ -558,12 +546,23 @@ gc()
 #### final ####
 
 final_df <- final_df %>% 
-  slice(-c(2391, #mom_age_at_del = 0
-           2391,
-           8691,
-           17653))
+  slice(-c(2414, #mom_age_at_del = 0
+           6948,
+           7362,
+           8094,
+           8784,
+           12920,
+           14744,
+           15461,
+           16358,
+           16730,
+           16879,
+           17873,
+           18878,
+           14061, #baby birth wt weird
+           10546))
 
-save(final_df, file='final_df.Rdata')
+save(final_df, file='~/Desktop/grad/capstone/final_df.Rdata')
 
 ####
 
@@ -571,6 +570,8 @@ save(final_df, file='final_df.Rdata')
 #### db disconnect ####
 dbDisconnect(db)
 ####
+
+
 #### testing zone ####
 
 # a <- c(1,2,3,4,5)
@@ -637,5 +638,10 @@ dbDisconnect(db)
 
 
 
+
+final_df <- final_df %>% 
+  
+
+save(final_df, file = 'final_df.Rdata')
 
 
