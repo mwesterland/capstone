@@ -1,0 +1,152 @@
+% Created 2023-02-19 Sun 22:05
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Maggie}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={Maggie},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 28.2 (Org mode 9.5.5)}, 
+ pdflang={English}}
+\begin{document}
+
+\tableofcontents
+
+\subsubsection{{\bfseries\sffamily DONE} initial mtg w/ tarima, palatnik, 2/15 @ 9a}
+\label{sec:org2e03f92}
+\subsubsection{{\bfseries\sffamily DONE} summary email to everyone \textasciitilde{} 2/12}
+\label{sec:org03e7654}
+\subsubsection{{\bfseries\sffamily TODO} wait for Tvina unique codes \textasciitilde{}2/24}
+\label{sec:orgddd0142}
+
+
+\section{02/01/2023 \textasciitilde{} 30 min}
+\label{sec:org8e177b8}
+meeting w Dr. Tarima + Brazauskas
+\begin{itemize}
+\item discussed basics/outline of capstone
+\begin{itemize}
+\item 20-40 pages
+\item end of april timeline
+\end{itemize}
+\item ideas: collaboration Dr. Palatanik or Dr. Szabo or Brazauskas
+\item Tarima to be mentor
+\end{itemize}
+
+\subsection{PROJECT:}
+\label{sec:org5ab225c}
+Title: Predictive value of ASCVD score for obstetrics outcomes  (gestational hypertension or preeclampsia, gestational diabetes, 
+delivery < 37 weeks of gestation, birth weight < 2500g). Resident will pull ICD10 codes.
+
+Population: All births, maternal outcomes
+
+\subsection{TARIMA EMAIL 2/1}
+\label{sec:orgb9c3b2c}
+Dear Maggie,
+
+Here are rough steps and a tentative timeline:
+
+Initial meeting (\textasciitilde{} Feb 7th-10th). If possible, try to schedule the initial meeting on February 7th or 9th,1:30-3. This is the time when I am teaching my class and it will be great if my students can attend the initial meeting between Dr. Palatnik, you, me and a subject area expert (Dr. Palatnik will introduce the expert later).    
+
+After the initial meeting prepare a follow-up email summarizing the aims, an initial statistical analysis plan, timeline, and a rough estimate of the number of hours you expect this project will take. After my approval, email this summary to all of us (\textasciitilde{} Feb 12th). 
+
+Data extraction and preparation. Let's try to complete this step by the end of February (\textasciitilde{} Feb 28th). Summarize the "data extraction and preparation" into a couple (or more) pages, attach the R code you used for data cleaning and data management and email both documents () to me. This summary will be a start of the statistical report and the R code will be an attachment (\textasciitilde{} March 3rd).
+
+Target date for the initial report (built on the initial summary with added tables, figures and methods and conclusions) using the dataset prepared in part 3 will be due on March 15th. This report will be sent to Dr. Palatnik and the subject area expert and their feedback by March 20th. Maybe we will need another meeting at this time.
+
+Then, we will have about 2-3 weeks to make final edits and extra analyses and schedule a finale meeting \textasciitilde{}April 10. When your project is completed,  email me a ZIP file with all project-related files (the dataset prepared for data analysis, R codes, stat reports) and how much time you spent on this project.
+
+Thus, by April 10th or so you will have your consulting project completed, which will contain your core material needed for a capstone project.  By April 20th email me your (written) capstone project. I will provide some feedback and by April 30 (I expect) your capstone project will be completed and ready for submission to the graduate school.
+
+
+\section{2/15/2023 9a \textasciitilde{}60 min}
+\label{sec:org62c6b6b}
+mtg with Tarima, Palatnik, Tvina
+\begin{itemize}
+\item inital consult
+population == pts w high blood pressure in pregnancy NO data from before pregnancy, retrospective
+
+50\% == chronic hypertensive --> 5-10 yrs out
+
+HYP did not return to pre preg weight == higher risk of chronic hypertension
+time zero  first BMI calc  early in preg
+
+6 mo to regular pre preg weight
+
+inclusion criteria
+\begin{itemize}
+\item women who gave birth
+\begin{itemize}
+\item hypertension free before pregnancy
+\end{itemize}
+\end{itemize}
+\end{itemize}
+
+\subsection{WESTERLAND EMAIL 2/17}
+\label{sec:org61ef8e1}
+\begin{itemize}
+\item summary of initial consult mtg email to Palatnik, Tvina, Tarima
+\end{itemize}
+
+Hello all,
+
+It was a pleasure meeting you both in person, Dr. Palatnik and Dr. Tvina.
+
+To summarize the initial consult meeting from 2/15:
+
+Project Title: Risk of a Chronic Hypertension diagnosis in women, without hypertension before pregnancy, who did not return to their pre-delivery BMI within 1 year post-delivery.
+
+Where diagnosis of chronic hypertension includes either:
+a blood pressure systolic ≥130 mmHg or diastolic ≥80 mmHg AND/OR
+ICD 10 diagnosis of chronic HTN AND/OR
+current prescription of an antihypertensive medication.
+
+Attendees: Anna Palatnik MD, Alina Tvina MD, Sergey Tarima PhD and Maggie Westerland
+
+Synopsis: During the initial statistical consultation meeting, Dr. Palatnik described her research question and general thoughts. Dr. Tarima then demoed data querying from a subset of the population of interest using TriNetX and Honest Broker. Drs. Tvina and Palatnik shared concerns and comments about data querying and the population. Further querying using either i2b2 or TriNetX will be needed with the addition of ICD-10 codes.
+
+Data: The dataset will consist of patient demographics (age, BMI, blood pressure, etc), dates of delivery, as well as dates of BMI pre- and post-delivery for analysis. ICD and procedure codes will be extracted as well. The data will have been collected from 2010 – 2023 and will be queried from Children’s Hospital of Wisconsin as well as Froedtert Hospital.
+
+Data analysis plan: A detailed statistical analysis plan will be written up by the master’s student, Maggie Westerland, to be sent to the group. This will include all statistical objectives, a data dictionary, , planned statistical methods, and figure and table templates for the statistical report.
+
+The current TO-DO list:
+
+Dr. Tvina:
+Supply the ICD-10 codes for determining our final population (delivery, BMI measurement, blood pressure measurement)
+Export dataset of unique IDs (either from i2b2 or TriNetX) for the master’s student to query using Honest Broker (can send these over email in an excel file)
+
+Maggie:
+Assist Dr. Tvina with any help needed using i2b2 or TriNetX
+Query and extract dataset from Honest Broker
+Draft Statistical Analysis Plan (SAP)
+
+Dr. Tarima:
+Oversee the data query as well as provide input for SAP
+
+Timeline: 
+2/24 -- an excel file of unique IDs to be used in Honest Broker will be sent to Maggie (swesterland@mcw.edu) by the end of the day
+
+3/3 -- statistical analysis plan/report to be completed by Maggie for review from Dr. Tarima
+
+3/15 -- initial report for review by Dr. Palatnik and Dr. Tvina (we may want to schedule another meeting at this time to go over this report)
+
+4/10 -- final edits/extra analyses/final meeting to be completed around April 10th.
+
+
+Thank you all and feel free to reach out to me at any time with questions or concerns,
+Maggie
+\end{document}
