@@ -3,8 +3,8 @@ title: "APdata_analysisMW"
 author: "Maggie Westerland"
 date: "`r Sys.Date()`"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -17,7 +17,6 @@ library(DBI)
 library(RSQLite)
 library(lubridate)
 library(glmnet)
-library(ROCR)
 setwd('~/Desktop/grad/capstone/code')
 ```
 
@@ -26,10 +25,10 @@ setwd('~/Desktop/grad/capstone/code')
 load('final_df.Rdata')
 ```
 
-```{r, warning=F}
+```{r}
 final_df <- final_df %>% 
   mutate(pre_htn = as.factor(pre_htn)) %>% 
-  mutate(post_htn = as.factor(post_htn), levels(c('yes','no'))) %>% 
+  mutate(post_htn = as.factor(post_htn)) %>% 
   mutate(bmi_return = as.factor(bmi_return)) %>% 
   mutate(gest_age_wks = as.numeric(gest_age_wks)) %>% 
   mutate(ob_gravidity = as.character(ob_gravidity)) %>% 
@@ -70,17 +69,10 @@ final_df <- final_df %>%
                                                   9,
                                                   10,
                                                   11,
-                                                  12))) %>% 
-  mutate(post_htn = case_when(
-    post_htn == 'no' ~ 0,
-    post_htn == 'yes' ~ 1
-  )) %>% 
-  mutate(post_htn = as.factor(post_htn))
+                                                  12)))
 ```
-\\
-\\
-\\
-```{r, warning=F}
+
+```{r}
 final_df %>% 
   select(mom_age_at_del,
          mom_race,
@@ -94,8 +86,8 @@ final_df %>%
          maternal_dvt,
          gest_age_wks,
          delivery_method,
-         #ob_gravidity,
-         #ob_parity,
+         ob_gravidity,
+         ob_parity,
          ob_multiple_births,
          baby_count,
          mean_pre_bmi,
@@ -169,26 +161,6 @@ summary(step_unweight2)
 tbl_regression(step_unweight2, exponentiate = T)
 ```
 
-
-ROC/AUC
-```{r}
-final_df$predicted <- predict(step_unweight2, newdata = final_df, type="response")
-
-final_df_pred <- final_df[complete.cases(final_df[, c("predicted", "post_htn")]),]
-
-pred <- prediction(final_df_pred$predicted, final_df_pred$post_htn)
-perf <- performance(pred, "tpr", "fpr")
-
-auc <- as.numeric(performance(pred, measure = "auc")@y.values)
-auc
-
-plot(perf, main="ROC Curve", col="blue", lwd=2, xlim=c(0,1), ylim=c(0,1))
-abline(0,1, lwd=2, col="gray")
-text(0.8, 0.2, paste("AUC = ", round(auc, 2)), cex = 1.2)
-```
-
-
-####
 data dictionary:
 
 **patient_num**: *integer* unique to each patient
